@@ -17,6 +17,7 @@ import com.example.fabricadebrinquedos.sampledata.sampleProducts
 fun SearchTextField(
     searchText: String,
     onSearchChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
 
     OutlinedTextField(
