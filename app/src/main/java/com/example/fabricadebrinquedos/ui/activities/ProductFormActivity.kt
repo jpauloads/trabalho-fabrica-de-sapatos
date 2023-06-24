@@ -17,31 +17,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.fabricadebrinquedos.R
+import com.example.fabricadebrinquedos.dao.ProductDao
 import com.example.fabricadebrinquedos.model.Product
 import com.example.fabricadebrinquedos.ui.theme.FabricaDeBrinquedosTheme
 import java.math.BigDecimal
+import java.text.DecimalFormat
 
 class ProductFormActivity : ComponentActivity() {
+
+    private val dao = ProductDao()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             FabricaDeBrinquedosTheme {
                 Surface {
-                    ProductFormScreen()
+                    ProductFormScreen (onSaveClick = { product ->
+                        dao.save(product)
+                        finish()
+                    })
                 }
             }
         }
     }
 
     @Composable
-    fun ProductFormScreen() {
+    fun ProductFormScreen(
+        onSaveClick: (Product) -> Unit = {}
+    ) {
         Column(
             Modifier
                 .fillMaxSize()
@@ -103,16 +113,27 @@ class ProductFormActivity : ComponentActivity() {
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Next,
+                    capitalization = KeyboardCapitalization.Words,
                 )
             )
 
             var price by remember {
                 mutableStateOf("")
             }
+            val formatter = remember {
+                DecimalFormat("#.##")
+            }
+
             TextField(
                 value = price,
                 onValueChange = {
-                    price = it
+                    try {
+                        price = formatter.format(BigDecimal(it))
+                    } catch (e: IllegalArgumentException){
+                        if(it.isBlank()) {
+                            price = it
+                        }
+                    }
                 },
                 Modifier.fillMaxWidth(),
                 label = {
@@ -140,6 +161,7 @@ class ProductFormActivity : ComponentActivity() {
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
+                    capitalization = KeyboardCapitalization.Sentences,
                 )
             )
 
@@ -157,6 +179,7 @@ class ProductFormActivity : ComponentActivity() {
                         description = description
                     )
                     Log.i("ProductFormActivity", "ProductFormScreen: $product")
+                    onSaveClick(product)
                 },
                 Modifier.fillMaxWidth(),
             ) {

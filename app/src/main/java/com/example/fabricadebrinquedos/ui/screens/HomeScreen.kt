@@ -9,47 +9,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.fabricadebrinquedos.model.Product
-import com.example.fabricadebrinquedos.sampledata.sampleProducts
 import com.example.fabricadebrinquedos.sampledata.sampleSections
 import com.example.fabricadebrinquedos.ui.components.CardProductItem
 import com.example.fabricadebrinquedos.ui.components.ProductsSection
 import com.example.fabricadebrinquedos.ui.components.SearchTextField
 import com.example.fabricadebrinquedos.ui.theme.FabricaDeBrinquedosTheme
 
+class HomeScreenUiState(
+    val sections: Map<String, List<Product>> = emptyMap(),
+    val searchedProducts: List<Product> = emptyList(),
+    val searchText: String = "",
+    val onSearchChange: (String) -> Unit = {}
+) {
+
+    fun isShowSections(): Boolean {
+        return searchText.isBlank()
+    }
+
+}
+
 @Composable
 fun HomeScreen(
-    sections: Map<String, List<Product>>,
-    searchText: String = "",
+    state: HomeScreenUiState = HomeScreenUiState(),
 ) {
     Column {
-        var text by remember {
-            mutableStateOf(searchText)
-        }
+        val sections = state.sections
+        val text = state.searchText
+        val searchedProducts = state.searchedProducts
         SearchTextField(
             searchText = text,
-            onSearchChange = {
-                text = it
-            },
+            onSearchChange = state.onSearchChange,
+            Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
         )
-        val searchedProducts = remember(text) {
-            sampleProducts.filter { product ->
-                product.name.contains(
-                    text,
-                    ignoreCase = true,
-                ) ||
-                        product.description?.contains(
-                            text,
-                            ignoreCase = true,
-                        ) ?: false
-            }
-        }
+
         LazyColumn(
             Modifier
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
-            if (text.isBlank()) {
+            if (state.isShowSections()) {
                 for (section in sections) {
                     val title = section.key
                     val products = section.value
@@ -86,7 +87,7 @@ fun HomeScreen(
 fun HomeScreenPreview() {
     FabricaDeBrinquedosTheme {
         Surface {
-            HomeScreen(sampleSections)
+            HomeScreen(HomeScreenUiState(sections = sampleSections))
         }
     }
 }
@@ -97,8 +98,7 @@ fun HomeScreenWithSearchText() {
     FabricaDeBrinquedosTheme {
         Surface {
             HomeScreen(
-                sampleSections,
-                searchText = "a",
+                state = HomeScreenUiState(searchText = "a", sections = sampleSections)
             )
         }
     }
