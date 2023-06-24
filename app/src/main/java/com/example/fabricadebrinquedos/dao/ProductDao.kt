@@ -1,18 +1,20 @@
 package com.example.fabricadebrinquedos.dao
 
-import androidx.compose.runtime.mutableStateListOf
 import com.example.fabricadebrinquedos.model.Product
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class ProductDao {
 
-    //Ajuste o DAO para que a lista seja uma implementação de SnapshotStateList. Você pode usar a função
-    companion object {                                       // * transformar a referencia em array
-        private val products = mutableStateListOf<Product>()//*sampleProducts.toTypedArray()
+    companion object {
+        private val products =
+            MutableStateFlow<List<Product>>(emptyList()) //no momento inicial é uma lista vazia
     }
 
-    fun products() = products.toList()
+    fun products() = products.asStateFlow()
+    //fun products(): StateFlow<List<Producst>> = preducts
 
     fun save(product: Product) {
-        products.add(product)
+        products.value = products.value + product
     }
 }

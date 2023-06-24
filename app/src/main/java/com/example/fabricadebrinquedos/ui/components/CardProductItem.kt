@@ -8,11 +8,13 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.Dp
@@ -29,9 +31,9 @@ fun CardProductItem(
     product: Product,
     modifier: Modifier = Modifier,
     elevation: Dp = 4.dp,
-    expanded: Boolean = false
+    isExpanded: Boolean = false
 ) {
-    var expandedState by remember { mutableStateOf(expanded) }
+    var expandedState by rememberSaveable { mutableStateOf(isExpanded) }
 
     Card(
         modifier
@@ -65,20 +67,22 @@ fun CardProductItem(
                     text = product.price.toBrazilianCurrency()
                 )
             }
-            val textOverflow =
-                if (expandedState) TextOverflow.Visible
-                else TextOverflow.Ellipsis
-            val maxLines =
-                if (expandedState) Int.MAX_VALUE
-                else 2
-            product.description?.let {
-                Text(
-                    text = product.description,
-                    Modifier
-                        .padding(16.dp),
-                    overflow = textOverflow,
-                    maxLines = maxLines
-                )
+//            val textOverflow =
+//                if (expandedState) TextOverflow.Visible
+//                else TextOverflow.Ellipsis
+//            val maxLines =
+//                if (expandedState) Int.MAX_VALUE
+//                else 2
+            if (expandedState) {
+                product.description?.let {
+                    Text(
+                        text = product.description,
+                        Modifier
+                            .padding(16.dp),
+//                    overflow = textOverflow,
+//                    maxLines = maxLines
+                    )
+                }
             }
         }
     }
@@ -126,7 +130,7 @@ private fun CardProductItemWithDescriptionExpandedPreview() {
                     price = BigDecimal("9.99"),
                     description = LoremIpsum(50).values.first()
                 ),
-                expanded = true,
+                isExpanded = true,
             )
         }
     }
